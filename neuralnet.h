@@ -30,6 +30,8 @@ double** myneurons;
 double** voltages;
 double ** spikes;
 
+bool debug;
+
 void init(int mynetsize, int mymaxtime) {
 
 
@@ -49,7 +51,11 @@ void init(int mynetsize, int mymaxtime) {
 	i0 = 0.2*tauM*sqrt(K);
 	C = -J0 / sqrt(K);
 	spikes_counter = 1;
+	debug = true;	
 
+	if(debug) {
+		printf("variables used:\nv_th = %f\nv_res =  %f\ni_reo =  %f\ntau_0 =  %f\ntimestep = %f\nK =  %f\nJ0 =  %f\ntauM = %f\ni0 =  %f\nC = %f\n" ,v_th, v_res, i_reo, tau_0, timestep, K, J0, tauM, i0, C);
+	}
 	// this initializes our neural network. its an adjazenzmatrix.
 //	double ** myneurons = (double**)(malloc(netsize));
 //
@@ -130,7 +136,7 @@ void calculate() {
 		//long timeindex = (long) (double)time/(double)timestep;
 		//cout << timeindex << endl;
 		double time = timeindex/timestep;
-		for (int i = 1; i < netsize; i++) {
+		for (int i = 0; i < netsize; i++) {
 			if (voltages[i][timeindex-1] == 0) {
 				zerovoltage++;
 			} else {
@@ -148,9 +154,10 @@ void calculate() {
 					}
 				}
 			} else {
-				double add = 0.8*(i_reo - (voltages[i][timeindex-1]+0) * tau_0*0.5) / 3; // the 3 is chosen by random
-				cout << add << " " << i_reo << " " << voltages[i][timeindex] << " " << tau_0 <<  "\n";
-				voltages[i][timeindex] += add; // missing: * timestep; 
+//				double newvalue = 0.8*(i_reo - (voltages[i][timeindex-1]+0) * tau_0*0.5) / 3; // the 3 is chosen by random
+				double newvalue = voltages[i][timeindex-1] + timestep*(i_reo - voltages[i][timeindex-1])*tau_0*0.5;
+				cout << newvalue << " " << i_reo << " " << voltages[i][timeindex-1] << " " << tau_0 <<  "\n";
+				voltages[i][timeindex] = newvalue; // missing: * timestep; 
 			}
 		}
 	}
