@@ -60,7 +60,9 @@ void init(int mynetsize, int mymaxtime) {
 	for(int i = 0; i < netsize; i++) {
 		myneurons[i]= new double[netsize];
 	}
-
+// initializing random seed
+	srand(time(NULL));
+//
 //#pragma offload target(mic)
 //#pragma omp parallel for
 	for (int i = 0; i < netsize; i++) {
