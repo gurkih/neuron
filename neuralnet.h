@@ -3,12 +3,15 @@
 #include <math.h> // for sqrt
 #include <iostream> //for std::cout, std::end
 #include <fstream> //for writing csvs
+#include <omp.h> // parallel stuff
 
 using namespace std;
 
 class neuralnet {
 
 public:
+
+//#pragma offload_attribute (push,target(mic))
 int netsize;
 int maxtime;
 double v_th;
@@ -28,6 +31,10 @@ double** voltages;
 double ** spikes;
 
 void init(int mynetsize, int mymaxtime) {
+
+
+//#pragma offload_attribute (push,target(mic)) {
+
 	netsize = mynetsize;
 	maxtime = mymaxtime;	
 
@@ -49,9 +56,13 @@ void init(int mynetsize, int mymaxtime) {
 //	magic taken from https://www.c-plusplus.net/forum/277504-full
 //
 	myneurons = new double*[netsize];
+
 	for(int i = 0; i < netsize; i++) {
 		myneurons[i]= new double[netsize];
 	}
+
+//#pragma offload target(mic)
+//#pragma omp parallel for
 	for (int i = 0; i < netsize; i++) {
 		for (int j = 0; j < netsize; j++) {
 			double tmp;
@@ -70,6 +81,7 @@ void init(int mynetsize, int mymaxtime) {
 	int myysize = (int)(maxtime/timestep);
 //	double voltages [netsize][myysize]; <- this is seriously wrong. dont do this!!!
 	voltages = new double*[netsize];
+//#pragma omp parallel for
 	for(int x = 0; x < netsize; x++){
 		voltages[x] = new double[myysize];
 	}
@@ -78,6 +90,7 @@ void init(int mynetsize, int mymaxtime) {
 			voltages[x][y]= 0;
 		}
 	}
+//#pragma omp parallel for
 	for (int x = 0; x < netsize; x++) {
 		int myrand = rand() % 10;
 		int currentindex = (int)((double)myrand/timestep);
@@ -141,9 +154,12 @@ void writecsv() {
 	myneuronsfile.open("myneurons.csv");
 	for (int i = 0; i < netsize; i++) {
 		for(int j = 0; j < netsize; j++) {
-			myneuronsfile << myneurons[i][j] << ", ";
+			myneuronsfile << myneurons[i][j]; 
+			if(j < netsize-1) {
+				myneuronsfile << ", ";
+			}
 		}
-		myneuronsfile << "\n";
+		myneuronsfile << ";\n";
 	}
 	myneuronsfile.close();
 
@@ -151,9 +167,12 @@ void writecsv() {
 	myvoltagesfile.open("myvoltages.csv");
 	for(int i = 0; i < myysize; i++) {
 		for (int j = 0; j < netsize; j++) {
-			myvoltagesfile << voltages[j][i] << ", ";
+			myvoltagesfile << voltages[j][i]; 
+			if(j < netsize-1) {
+				myvoltagesfile << ", ";
+			}
 		}
-		myvoltagesfile << "\n";
+		myvoltagesfile << ";\n";
 	}
 	myvoltagesfile.close();
 
