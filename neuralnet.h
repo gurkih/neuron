@@ -71,9 +71,12 @@ void init(int mynetsize, int mymaxtime) {
 			tmp = rand() % 10;
 //			cout << tmp << "<- this is my epic rand \n";
 			if (tmp > 6) {
-				this->myneurons[i][j] = ((double) rand() / (RAND_MAX)); //* 2 - 1; uncomment this if hemmung is wanted/needed
+				//this->myneurons[i][j] = ((double) rand() / (RAND_MAX)) * 2 - 1; //* 2 - 1; uncomment this if hemmung is wanted/needed
 			} else {
 				myneurons[i][j] = 0;
+			}
+			if(i == j) {
+					myneurons[i][j] = 0.01;
 			}
 		}
 	}
@@ -89,9 +92,14 @@ void init(int mynetsize, int mymaxtime) {
 	}
 	for (int x = 0; x < netsize; x++) {
 		for (int y = 0; y < myysize; y++) {
-			voltages[x][y]= 0;
+			voltages[x][y] = 0;
 		}
 	}
+	for (int y = 0; y < netsize; y++) {
+		double myrand = (double) ((double)rand()/ (double)RAND_MAX);
+		voltages[y][0] = myrand;
+	}
+
 //#pragma omp parallel for
 	for (int x = 0; x < netsize; x++) {
 		int myrand = rand() % 10;
@@ -140,9 +148,9 @@ void calculate() {
 					}
 				}
 			} else {
-				double add = 0.8*(i_reo - (voltages[i][timeindex-1]+0) * tau_0*0.5);
-			//	cout << add << " " << i_reo << " " << voltages[i][timeindex] << " " << tau_0 <<  "\n";
-				voltages[i][timeindex] += add; // missing: * timestep	
+				double add = 0.8*(i_reo - (voltages[i][timeindex-1]+0) * tau_0*0.5) / 3; // the 3 is chosen by random
+				cout << add << " " << i_reo << " " << voltages[i][timeindex] << " " << tau_0 <<  "\n";
+				voltages[i][timeindex] += add; // missing: * timestep; 
 			}
 		}
 	}
