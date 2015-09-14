@@ -44,7 +44,7 @@ void init(int mynetsize, int mymaxtime) {
 	v_res = 0;
 	i_reo = 1;
 	tau_0 = 10;
-	timestep = 0.1;
+	timestep = 0.01; //was 0.1
 	K = 22;
 	J0 = 1;
 	tauM = 0.001;
@@ -70,7 +70,7 @@ void init(int mynetsize, int mymaxtime) {
 	srand(time(NULL));
 //
 //#pragma offload target(mic)
-//#pragma omp parallel for
+#pragma omp parallel for
 	for (int i = 0; i < netsize; i++) {
 		for (int j = 0; j < netsize; j++) {
 			double tmp;
@@ -92,7 +92,7 @@ void init(int mynetsize, int mymaxtime) {
 	int myysize = (int)(maxtime/timestep);
 //	double voltages [netsize][myysize]; <- this is seriously wrong. dont do this!!!
 	voltages = new double*[netsize];
-//#pragma omp parallel for
+#pragma omp parallel for
 	for(int x = 0; x < netsize; x++){
 		voltages[x] = new double[myysize];
 	}
@@ -106,7 +106,7 @@ void init(int mynetsize, int mymaxtime) {
 		voltages[y][0] = myrand;
 	}
 
-//#pragma omp parallel for
+#pragma omp parallel for
 	for (int x = 0; x < netsize; x++) {
 		int myrand = rand() % 10;
 		int currentindex = (int)((double)myrand/timestep);
